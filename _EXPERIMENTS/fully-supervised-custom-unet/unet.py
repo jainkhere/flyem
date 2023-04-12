@@ -5,7 +5,8 @@ import interactive_plot
 
 def load_model_unet(file, use_dice_loss=False, use_jaccard_loss=False, use_focal_loss=False):
     from keras.models import load_model
-    cobj = {'keras_precision': metrics.keras_precision, 'keras_recall': metrics.keras_recall, 'keras_jaccard_coef': metrics.keras_jaccard_coef, 'keras_dice_coef': metrics.keras_dice_coef}
+
+    cobj = {'keras_precision': metrics.keras_precision, 'keras_recall': metrics.keras_recall, 'keras_jaccard_coef': metrics.keras_jaccard_coef, 'keras_dice_coef': metrics.keras_dice_coef, 'iou': iou, 'iou_thresholded': iou_thresholded, 'accuracy': 'accuracy'}
     if use_dice_loss:
         cobj['keras_dice_coef_loss'] = metrics.keras_dice_coef_loss
     if use_jaccard_loss:
@@ -192,92 +193,14 @@ def get_unet(lrate, diceloss=False, jaccardloss=False, focalloss=False, customlo
         dropout=0.5,
         output_activation='sigmoid')
 
-    model.compile(optimizer = Adam(lr = lrate), loss = lss, metrics = ['accuracy', metrics.keras_precision, metrics.keras_recall, metrics.keras_jaccard_coef, metrics.keras_dice_coef])
+    model.compile(optimizer = Adam(lr = lrate), loss = lss, metrics = ['accuracy', iou, iou_thresholded, metrics.keras_precision, metrics.keras_recall, metrics.keras_jaccard_coef, metrics.keras_dice_coef])
 
     return model
 
 
 #normal execute_predict
 def execute_predict(model, img_in, stepsize=512, resize_shortest=True, extensive=True):
-    if img_in.shape[1]==512 and img_in.shape[2]==512: #no need for resize
-        return model.predict(img_in) 
-    
-#     original_shape = img_in.shape[1:3]
-#     img_in = img_in.copy()
-#     downsampled=False
-#     if resize_shortest: #resize s.t. shorter side is 512
-#         downsampled=True
-#         new_img_in = []
-#         for i in tqdm(range(img_in.shape[0])):
-#             ssize = min(img_in[i].shape[0], img_in[i].shape[1])
-#             lsize = max(img_in[i].shape[0], img_in[i].shape[1])
-#             newssize = 512
-#             newlsize = int(lsize/float(ssize)*newssize)
-            
-#             if img_in[i].shape[1]>img_in[i].shape[0]: #wide
-#                 new_img_in.append(cv2.resize(img_in[i], (newlsize, newssize)))
-
-#             else: #high
-#                 new_img_in.append(cv2.resize(img_in[i], (newssize, newlsize)))
-            
-#         img_in = np.array(new_img_in)
-#     else:
-#         img_in = img_in[:,:,:,0]
-        
-#     s_to_feed = []
-#     startx=0
-#     starty=0
-#     num_newsamples=0
-#     index_stack=0
-#     num_imgs, ih,iw = img_in.shape
-    
-#     big_res = np.zeros(shape=img_in.shape)
-#     num_eval_field = np.zeros(shape=img_in.shape)
-    
-#     transforms = ['no']
-#     if extensive:
-#         transforms.extend(['flip-x', 'flip-y', 'flip-xy'])
-    
-#     total = len(list(range(0, iw, stepsize)))*len(list(range(0, ih, stepsize)))*len(transforms)
-#     gct = 0
-#     for startx in range(0, iw, stepsize):
-#         for starty in range(0, ih, stepsize):
-#             if startx+512>iw: startx=iw-512
-#             if starty+512>ih: starty=ih-512
-#             crop = img_in[:,starty:(starty+512),startx:(startx+512)]
-#             crop = crop.reshape(crop.shape[0], crop.shape[1], crop.shape[2], 1)
-            
-#             for t in transforms:
-#                 currimg = crop.copy()
-#                 if t in ['flip-x', 'flip-xy']: #flip vertically
-#                     currimg = np.flip(currimg, 0)
-#                 if t in ['flip-y', 'flip-xy']: #flip horizontally
-#                     currimg = np.flip(currimg, 1)
-#                 pred = predict_net(model, currimg, verbose=1)
-#                 pred = pred[:,:,:,0]
-                
-#                 if t in ['flip-x', 'flip-xy']: #flip vertically
-#                     pred = np.flip(pred, 0)
-#                 if t in ['flip-y', 'flip-xy']: #flip horizontally
-#                     pred = np.flip(pred, 1)
-                
-#                 big_res[:,starty:(starty+512),startx:(startx+512)]+=pred
-#                 num_eval_field[:,starty:(starty+512),startx:(startx+512)]+=np.ones_like(pred)
-#                 gct+=1
-#                 print(gct, 'of', total)
-
-                
-                
-#     big_res/=num_eval_field
-    
-#     if downsampled: #upsample result
-#         big_res_new = []
-#         for i in range(big_res.shape[0]):
-#             big_res_new.append(cv2.resize(big_res[i], (original_shape[1], original_shape[0]), interpolation=cv2.INTER_NEAREST))
-#         big_res = np.array(big_res_new)
-                
-#     big_res = big_res.reshape(big_res.shape[0],big_res.shape[1], big_res.shape[2], 1) 
-#     return big_res 
+    return model.predict(img_in) 
 
 def improve_components(test_pred, depth=9):
     return median_filter(test_pred, size=(depth,1,1,1)) #run z-smoothing (median filter)
