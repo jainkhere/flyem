@@ -216,13 +216,13 @@ class ImageUtils:
             bx = (minc, maxc, maxc, minc, minc)
             by = (minr, minr, maxr, maxr, minr)
             circularity = (region.perimeter ** 2) / (4 * math.pi * region.area);
-            if circularity < 1.3 and circularity > 0.7:
+            if circularity < 2 and circularity > 0.4:
                 num_circles += 1
                 axarr[1].plot(y1, x1, '.r', markersize=3.5)
-            if x/y >= .7 and x/y <= 1.3:
+            if x/y >= 0.4 and x/y <= 2:
                 num_sq += 1
                 axarr[1].plot(bx, by, '-g', linewidth=2.5)
-            if circularity < 1.3 and circularity > 0.7 and x/y >= .7 and x/y <= 1.3:
+            if circularity < 2 and circularity > 0.4 and x/y >= 0.4 and x/y <= 2:
                 num_circle_sq += 1
                 axarr[1].plot(y1, x1, '.b', markersize=3.5)
                 axarr[1].plot(bx, by, '-b', linewidth=2.5)
