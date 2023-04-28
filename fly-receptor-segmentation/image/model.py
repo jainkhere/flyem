@@ -30,14 +30,10 @@ class Image:
     @staticmethod
     def label(data):
         return ImageUtils.apply_region_labelling(data)
-
-    @staticmethod
-    def remove_small_regions(data, region_size):
-        return ImageUtils.remove_small_regions(data, region_size)
     
     @staticmethod
-    def remove_large_regions(data, region_size):
-        return ImageUtils.remove_large_regions(data, region_size)
+    def remove_regions(data, min_region_size, max_region_size):
+        return ImageUtils.remove_regions(data, min_region_size, max_region_size)
 
     @staticmethod
     def binary_mask(data):

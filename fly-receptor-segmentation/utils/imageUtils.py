@@ -72,21 +72,15 @@ class ImageUtils:
         labeled_result, nr_objects_result = mh.label(original_image)
         labeled_result = mh.labeled.remove_bordering(labeled_result)
         return labeled_result, nr_objects_result
-
-    @staticmethod
-    def remove_small_regions(labeled, region_size):
-        # return the resultant image after removing small regions
-        sizes = mh.labeled.labeled_size(labeled)
-        too_small = np.where(sizes < region_size)
-        labeled_result = mh.labeled.remove_regions(labeled, too_small)
-        return labeled_result
     
     @staticmethod
-    def remove_large_regions(labeled, region_size):
+    def remove_regions(labeled, min_region_size, max_region_size):
         # return the resultant image after removing small regions
         sizes = mh.labeled.labeled_size(labeled)
-        too_large = np.where(sizes > region_size)
-        labeled_result = mh.labeled.remove_regions(labeled, too_large)
+        too_small = np.where(sizes < min_region_size)
+        too_large = np.where(sizes > max_region_size)
+        labeled_result_large = mh.labeled.remove_regions(labeled, too_small)
+        labeled_result = mh.labeled.remove_regions(labeled_result_large, too_large)
         return labeled_result
 
     @staticmethod

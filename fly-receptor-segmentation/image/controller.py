@@ -33,12 +33,8 @@ class ImageController:
         return Image.label(data)
 
     @staticmethod
-    def remove_small_regions(data, region_size):
-        return Image.remove_small_regions(data, region_size)
-    
-    @staticmethod
-    def remove_large_regions(data, region_size):
-        return Image.remove_large_regions(data, region_size)
+    def remove_regions(data, min_region_size, max_region_size):
+        return Image.remove_regions(data, min_region_size, max_region_size)
 
     @staticmethod
     def binary_mask(data):
